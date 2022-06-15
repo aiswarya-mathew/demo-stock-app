@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Config;
 
 class TradeController extends Controller
 {
+    /**
+     * Given a user_id, fetches all the trades made by that user
+     */
     public function show(Request $request)
     {
         $validator = Validator::make(
@@ -50,6 +53,9 @@ class TradeController extends Controller
         ]);
     }
 
+    /**
+     * Adds a 'buy' trade
+     */
     public function buy(Request $request)
     {
         $validator = Validator::make(
@@ -104,6 +110,9 @@ class TradeController extends Controller
         ]);
     }
 
+    /**
+     * Adds a 'sell' trade
+     */
     public function sell(Request $request)
     {
         $validator = Validator::make(
@@ -157,6 +166,9 @@ class TradeController extends Controller
         ]);
     }
 
+    /**
+     * Given a trade_id, removes that trade
+     */
     public function remove(Request $request)
     {
         $validator = Validator::make(
@@ -201,6 +213,9 @@ class TradeController extends Controller
         ], 400);
     }
 
+    /**
+     * Given a trade_id, updates the given field to the given value
+     */
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -255,7 +270,9 @@ class TradeController extends Controller
             'info' => 'Trade updated successfully'
         ], 200);
     }
-
+    /**
+     * Given a user_id, fetches their portfolio
+     */
     public function portfolio(Request $request)
     {
         $validator = Validator::make(
@@ -290,7 +307,9 @@ class TradeController extends Controller
             'info' => 'User has no holdings'
         ]);
     }
-
+    /**
+     * Given a user_id, fetches their returns
+     */
     public function returns(Request $request)
     {
         $validator = Validator::make(
