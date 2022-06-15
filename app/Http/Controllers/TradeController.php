@@ -40,10 +40,14 @@ class TradeController extends Controller
 
         $user = User::find($validated_input['user_id']);
         $trades = $user->trades();
+
+        $trades_selected = $trades->map(function ($item, $key) {
+            return $item->only('trade_type', 'user_id', 'ticker', 'num_shares', 'price');
+        });
         if ($trades->count()) {
             return response()->json([
                 'status' => 'Success',
-                'info' => $trades,
+                'info' => $trades_selected,
             ]);
         }
 
@@ -295,10 +299,14 @@ class TradeController extends Controller
 
         $user = User::find($validated_input['user_id']);
         $holdings = $user->holdings;
+        $holdings_selected = $holdings->map(function ($item, $key) {
+            return $item->only('ticker', 'num_shares', 'avg_buy_price');
+        });
+        Log::error($holdings);
         if (count($holdings)) {
             return response()->json([
                 'status' => 'Success',
-                'info' => $holdings->pluck('ticker', 'num_shares', 'avg_buy_price')
+                'info' => $holdings_selected
             ]);
         }
 
