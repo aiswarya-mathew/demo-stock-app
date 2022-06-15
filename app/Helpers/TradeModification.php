@@ -64,7 +64,6 @@ class TradeModification
         $old_ticker = $trade->ticker;
         $trade->ticker = strtoupper($new_value);
         $trade->save();
-        Log::error("UNO");
         if ($trade->holding()->exists()) {
             $trade->holding->recalibrate();
         } else {
@@ -80,7 +79,6 @@ class TradeModification
             ['user_id', '=', $trade->user_id],
             ['ticker', '=', $old_ticker]
         ])->first();
-        Log::error("DOS");
 
         if ($old_ticker_holding != null) {
             $old_ticker_holding->recalibrate();
