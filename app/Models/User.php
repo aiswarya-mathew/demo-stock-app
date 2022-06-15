@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Log;
+
 
 class User extends Authenticatable
 {
@@ -49,8 +51,9 @@ class User extends Authenticatable
 
     public function trades()
     {
+        Log::error("HERE");
         $trades = $this->holdings->map(function ($item, $key) {
-            return $this->trades;
+            return $item->trades;
         })->flatten();
         return $trades;
     }
