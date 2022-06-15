@@ -14,13 +14,13 @@ class TradeModification
 
     public static function editTradeType($trade, $new_value)
     {
-        if ($new_value == 'sell' && ($trade->holding->num_shares < (2 * $trade->num_shares))) {
+        $holding  = $trade->currentOrPastHolding();
+        if ($new_value == 'sell' && ($holding->num_shares < (2 * $trade->num_shares))) {
             return false;
         }
 
         $trade->trade_type = $new_value;
         $trade->save();
-        $holding  = $trade->currentOrPastHolding();
         $holding->recalibrate();
         return true;
     }
