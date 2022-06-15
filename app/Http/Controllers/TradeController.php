@@ -30,7 +30,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
         $validated_input = $validator->validate();
@@ -40,13 +40,13 @@ class TradeController extends Controller
         if ($trades->count()) {
             return response()->json([
                 'status' => 'Success',
-                'data' => $trades,
+                'info' => $trades,
             ]);
         }
 
         return response()->json([
             'status' => 'Fail',
-            'message' => 'User has no trades',
+            'info' => 'User has no trades',
         ]);
     }
 
@@ -70,7 +70,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
 
@@ -99,7 +99,8 @@ class TradeController extends Controller
         $holding->updateAvgBuyPrice();
 
         return response()->json([
-            'result' => 'Added a buy trade'
+            'status' => 'Success',
+            'info' => 'Added a buy trade'
         ]);
     }
 
@@ -122,7 +123,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
 
@@ -151,7 +152,8 @@ class TradeController extends Controller
         $holding->save();
 
         return response()->json([
-            'result' => 'Successfully sold.'
+            'status' => 'Success',
+            'info' => 'Sold shares'
         ]);
     }
 
@@ -170,7 +172,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
         $validated_input = $validator->validate();
@@ -178,7 +180,8 @@ class TradeController extends Controller
         $trade = Trade::find($validated_input['trade_id']);
         if (empty($trade)) {
             return response()->json([
-                'result' => 'Trade does not exist'
+                'status' => 'Failed',
+                'info' => 'Trade does not exist'
             ], 400);
         }
 
@@ -187,12 +190,14 @@ class TradeController extends Controller
         $reverse_success = $holding->revertTrade($trade);
         if ($reverse_success) {
             return response()->json([
-                'result' => 'Successfully removed trade_id'
+                'status' => 'Success',
+                'info' => 'Removed trade'
             ]);
         }
 
         return response()->json([
-            'result' => 'Removal will result in negative shareholding'
+            'status' => 'Failed',
+            'info' => 'Removal will result in negative shareholding'
         ], 400);
     }
 
@@ -207,7 +212,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
 
@@ -215,7 +220,7 @@ class TradeController extends Controller
         if (!Schema::hasColumn('trades', $validated_input['field'])) {
             return response()->json([
                 'status' => 'Error',
-                'message' => 'Column does not exist in the table'
+                'info' => 'Column does not exist in the table'
             ], 400);
         }
 
@@ -232,7 +237,8 @@ class TradeController extends Controller
         $trade = Trade::find($validated_input['trade_id']);
         if ($trade == null) {
             return response()->json([
-                'result' => 'Trade does not exist'
+                'status' => 'Failed',
+                'info' => 'Trade does not exist'
             ], 400);
         }
         $result = TradeModification::$func($trade, $validated_input['value']);
@@ -240,14 +246,14 @@ class TradeController extends Controller
         if (!$result) {
             return response()->json([
                 'status' => 'Error',
-                'message' => 'Update will result in negative shareholding'
+                'info' => 'Update will result in negative shareholding'
             ], 400);
         }
 
         return response()->json([
             'status' => 'Success',
-            'message' => 'Trade updated successfully'
-        ], 400);
+            'info' => 'Trade updated successfully'
+        ], 200);
     }
 
     public function portfolio(Request $request)
@@ -265,7 +271,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
         $validated_input = $validator->validate();
@@ -275,13 +281,13 @@ class TradeController extends Controller
         if (count($holdings)) {
             return response()->json([
                 'status' => 'Success',
-                'portfolio' => $holdings->pluck('ticker', 'num_shares', 'avg_buy_price')
+                'info' => $holdings->pluck('ticker', 'num_shares', 'avg_buy_price')
             ]);
         }
 
         return response()->json([
-            'status' => 'Fail',
-            'message' => 'User has no holdings'
+            'status' => 'Failed',
+            'info' => 'User has no holdings'
         ]);
     }
 
@@ -300,7 +306,7 @@ class TradeController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'Validation error',
-                'message' => $validator->errors()->getMessages()
+                'info' => $validator->errors()->getMessages()
             ], 422);
         }
         $validated_input = $validator->validate();
@@ -324,7 +330,7 @@ class TradeController extends Controller
 
         return response()->json([
             'status' => 'Success',
-            'message' => $returns
+            'info' => $returns
         ]);
     }
 }
