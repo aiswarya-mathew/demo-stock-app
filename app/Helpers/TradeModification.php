@@ -19,15 +19,23 @@ class TradeModification
             return false;
         }
 
+        if (!in_array($new_value, ['buy', 'sell'])) {
+            return false;
+        }
+
         $trade->trade_type = $new_value;
         $trade->save();
         $holding->recalibrate();
         return true;
     }
 
-    public function editNumShares($trade, $new_value)
+    public static function editNumShares($trade, $new_value)
     {
         if ($trade->type == 'sell' && $trade->holding->num_shares < $new_value) {
+            return false;
+        }
+
+        if (!is_numeric($new_value) || $new_value <= 0) {
             return false;
         }
 
@@ -37,8 +45,12 @@ class TradeModification
         return true;
     }
 
-    public function editPrice($trade, $new_value)
+    public static function editPrice($trade, $new_value)
     {
+        if (!is_numeric($new_value) || $new_value <= 0) {
+            return false;
+        }
+
         $trade->price = $new_value;
         $trade->save();
         if ($trade->trade_type == 'buy') {
@@ -47,17 +59,28 @@ class TradeModification
         return true;
     }
 
-    public function editTicker($trade, $new_value)
+    public static function editTicker($trade, $new_value)
     {
         $old_ticker = $trade->ticker;
-        $trade->ticker = $new_value;
+        $trade->ticker = strtoupper($new_value);
         $trade->save();
-        $trade->holding->recalibrate();
+        Log::error("UNO");
+        if ($trade->holding()->exists()) {
+            $trade->holding->recalibrate();
+        } else {
+            $holding = new Holding;
+            $holding->user_id = $trade->user_id;
+            $holding->avg_buy_price = $trade->price;
+            $holding->num_shares = $trade->num_shares;
+            $holding->ticker = $trade->ticker;
+            $holding->save();
+        }
 
         $old_ticker_holding = Holding::where([
-            ['user_id' => $trade->user_id],
-            ['ticker' => $old_ticker]
+            ['user_id', '=', $trade->user_id],
+            ['ticker', '=', $old_ticker]
         ])->first();
+        Log::error("DOS");
 
         if ($old_ticker_holding != null) {
             $old_ticker_holding->recalibrate();
@@ -65,8 +88,12 @@ class TradeModification
         return true;
     }
 
-    public function editUserId($trade, $new_value)
+    public static function editUserId($trade, $new_value)
     {
+        if (!is_numeric($new_value) || $new_value <= 0) {
+            return false;
+        }
+
         $old_user_id = $trade->user_id;
         $trade->ticker = $new_value;
         $trade->save();
@@ -77,8 +104,8 @@ class TradeModification
             return false;
 
         $old_user_holding = Holding::where([
-            ['user_id' => $old_user_id],
-            ['ticker' => $trade->ticker]
+            ['user_id', '=', $old_user_id],
+            ['ticker', '=', $trade->ticker]
         ])->first();
 
         if ($old_user_holding != null) {
